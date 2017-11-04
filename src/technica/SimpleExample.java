@@ -19,117 +19,62 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEAL
 
 package technica;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Collectors;
+import java.nio.file.Paths;
+import java.util.Date;
 
-import technica.SpeechAPI.Language;
-import technica.SpeechAPI.OutputFormat;
-import technica.SpeechAPI.RecognitionMode;
+import com.sun.xml.internal.ws.util.ByteArrayBuffer;
 
-public class SpeechClientREST {
+public class SimpleExample {
 
-  private static final String REQUEST_URI = "https://speech.platform.bing.com/speech/recognition/dictation/cognitiveservices/v1";
-  private static final String PARAMETERS = "language=%s&format=%s";
+	public static void main(String[] args) throws Exception {
 
-  private RecognitionMode mode = RecognitionMode.Interactive;
-  private Language language = Language.en_US;
-  private OutputFormat format = OutputFormat.Simple;
+		if (args.length < 2) {
+			System.out.println("Usage: SimpleExample <subscription key> <file to transcribe>.");
+			return;
+		}
 
-  private final Authentication auth;
+		String key = args[0];
+		String filepath = args[1];
 
-  public SpeechClientREST(Authentication auth){
-    this.auth = auth;
-  }
+		SpeechClientREST client = new SpeechClientREST(new Authentication(key));
 
-  public RecognitionMode getMode() {
-    return mode;
-  }
+		InputStream input = new FileInputStream(Paths.get(filepath).toFile());
+		chunkInputStream(input, client);
+		//byte[] buffer = new byte[100000];
+		//while(in.read(buffer) != -1){
+			//System.out.println(client.process(input));
+			//in = chunkInputStream(input);
+		//}
+		
 
-  public void setMode(RecognitionMode mode) {
-    this.mode = mode;
-  }
+	}
 
-  public Language getLanguage() {
-    return language;
-  }
+	private static void chunkInputStream(InputStream input, SpeechClientREST client) throws IOException {
+		long startTime = System.currentTimeMillis();
+		long elapsedTime = 0L;
 
-  public void setLanguage(Language language) {
-    this.language = language;
-  }
-
-  public OutputFormat getFormat() {
-    return format;
-  }
-
-  public void setFormat(OutputFormat format) {
-    this.format = format;
-  }
-
-  private URL buildRequestURL() throws MalformedURLException {
-    String url = String.format(REQUEST_URI, mode.name().toLowerCase());
-    String params = String.format(PARAMETERS, language.name().replace('_', '-'), format.name().toLowerCase());
-    return new URL(String.format("%s?%s", url, params));
-  }
-
-  private HttpURLConnection connect() throws MalformedURLException, IOException {
-    HttpURLConnection connection = (HttpURLConnection) buildRequestURL().openConnection();
-    connection.setDoInput(true);
-    connection.setDoOutput(true); 
-    connection.setRequestMethod("POST");
-    connection.setRequestProperty("Content-type", "audio/wav; codec=\"audio/pcm\"; samplerate=16000");
-    connection.setRequestProperty("Accept", "application/json;text/xml");
-    connection.setRequestProperty("Authorization", "Bearer " + auth.getToken());
-    connection.setChunkedStreamingMode(0); // 0 == default chunk size
-    connection.connect();
-
-    return connection;
-  }
-
-  private String getResponse(HttpURLConnection connection) throws IOException {
-    if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-      throw new RuntimeException(String.format("Something went wrong, server returned: %d (%s)",
-          connection.getResponseCode(), connection.getResponseMessage()));
-    }
-
-    try (BufferedReader reader = 
-        new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-      return reader.lines().collect(Collectors.joining());
-    }
-  }
-
-  private HttpURLConnection upload(InputStream is, HttpURLConnection connection) throws IOException {
-    try (OutputStream output = connection.getOutputStream()) {
-      byte[] buffer = new byte[1024];
-      int length;
-      while ((length = is.read(buffer)) != -1) {
-        output.write(buffer, 0, length);
-      }
-      output.flush();
-    }
-    return connection;
-  }
-
-  private HttpURLConnection upload(Path filepath, HttpURLConnection connection) throws IOException {
-    try (OutputStream output = connection.getOutputStream()) {
-      Files.copy(filepath, output);
-    }
-    return connection;
-  }
-
-  public String process(InputStream is) throws IOException {
-    return getResponse(upload(is, connect()));
-  }
-
-  public String process(Path filepath) throws IOException {
-    return getResponse(upload(filepath, connect()));
-  }
+		while (elapsedTime < 2*60*1000) {
+		    //perform db poll/check
+		    elapsedTime = (new Date()).getTime() - startTime;
+		}
+		
+		byte[] resultBuff = new byte[0];
+	    byte[] buff = new byte[1000000];
+	    int k = -1;
+	    while((k = input.read(buff, 0, buff.length)) > -1) {
+	        byte[] tbuff = new byte[resultBuff.length + k]; // temp buffer size = bytes already read + bytes last read
+	        System.arraycopy(resultBuff, 0, tbuff, 0, resultBuff.length); // copy previous bytes
+	        System.arraycopy(buff, 0, tbuff, resultBuff.length, k);  // copy current lot
+	        resultBuff = tbuff; // call the temp buffer as your result buff
+	        System.out.println(client.process(new ByteArrayInputStream(resultBuff)));
+	        
+	    }
+	    String s = new String(resultBuff);
+	    System.out.println(s + " bytes read.");
+	   // return new ByteArrayInputStream(resultBuff);
+	}
 }

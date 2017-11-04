@@ -17,27 +17,37 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.microsoft.cognitive_services.speech_recognition.examples;
+package technica;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class SimpleExample {
+public class RenewableAuthentication extends Authentication {
 
-  public static void main(String[] args) throws Exception {
+  private final Timer timer = new Timer();
+  private long period = Duration.ofMinutes(9).toMillis(); // 9 minutes worth of ms.
 
-    if (args.length < 2) {
-      System.out.println("Usage: SimpleExample <subscription key> <file to transcribe>.");
-      return;
-    }
+  public RenewableAuthentication(String subscriptionKey) {
+    super(subscriptionKey);
+    // schedule a task to renew the token each 9 seconds,
+    // starting in 9 seconds from now.
+    timer.schedule(new TimerTask() {
 
-    String key = args[0];
-    String filepath = args[1];
+      @Override
+      public void run() {
+        fetchToken();
+      }
+    }, period, period);
+  }
 
-    SpeechClientREST client = new SpeechClientREST(new Authentication(key));
+  @Override
+  protected synchronized void setToken(String token) {
+    super.setToken(token);
+  }
 
-    InputStream input = new FileInputStream(Paths.get(filepath).toFile());
-    System.out.println(client.process(input));
+  @Override
+  public synchronized String getToken() {
+    return super.getToken();
   }
 }

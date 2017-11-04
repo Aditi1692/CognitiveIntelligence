@@ -17,7 +17,7 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.microsoft.cognitive_services.speech_recognition.examples;
+package technica;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,13 +31,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-import com.microsoft.cognitive_services.speech_recognition.examples.SpeechAPI.Language;
-import com.microsoft.cognitive_services.speech_recognition.examples.SpeechAPI.OutputFormat;
-import com.microsoft.cognitive_services.speech_recognition.examples.SpeechAPI.RecognitionMode;
+import technica.SpeechAPI.Language;
+import technica.SpeechAPI.OutputFormat;
+import technica.SpeechAPI.RecognitionMode;
 
 public class SpeechClientREST {
 
-  private static final String REQUEST_URI = "https://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
+  private static final String REQUEST_URI = "https://api.cognitive.microsoft.com/sts/v1.0";
   private static final String PARAMETERS = "language=%s&format=%s";
 
   private RecognitionMode mode = RecognitionMode.Interactive;

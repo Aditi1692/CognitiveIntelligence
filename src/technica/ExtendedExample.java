@@ -17,7 +17,7 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.microsoft.cognitive_services.speech_recognition.examples;
+package technica;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -50,9 +50,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.microsoft.cognitive_services.speech_recognition.examples.SpeechAPI.Language;
-import com.microsoft.cognitive_services.speech_recognition.examples.SpeechAPI.OutputFormat;
-import com.microsoft.cognitive_services.speech_recognition.examples.SpeechAPI.RecognitionMode;
+import technica.SpeechAPI.Language;
+import technica.SpeechAPI.OutputFormat;
+import technica.SpeechAPI.RecognitionMode;
 
 public class ExtendedExample extends JPanel implements ActionListener {
 

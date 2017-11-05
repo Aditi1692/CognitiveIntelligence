@@ -6,6 +6,9 @@ Convert speech to text and back again by using Microsoft Bing Speech Recognition
 
 java -jar cognitiveIntellience.jar key_name filename_path(.wav)
 
+key_name: 3f6ca28b9bf8458bbcf948022543380d 
+filename_path: home\aditi\CognitiveIntelligence\input1.wav
+
 This generates a file that is given as an input to the textanalytics.py file:
 
 python textanalytics.py output_filename

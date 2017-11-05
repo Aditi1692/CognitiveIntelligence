@@ -24,9 +24,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.Date;
 
-import com.sun.xml.internal.ws.util.ByteArrayBuffer;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class SimpleExample {
 
@@ -53,28 +53,26 @@ public class SimpleExample {
 
 	}
 
-	private static void chunkInputStream(InputStream input, SpeechClientREST client) throws IOException {
-		long startTime = System.currentTimeMillis();
-		long elapsedTime = 0L;
-
-		while (elapsedTime < 2*60*1000) {
-		    //perform db poll/check
-		    elapsedTime = (new Date()).getTime() - startTime;
-		}
+	private static void chunkInputStream(InputStream input, SpeechClientREST client) throws IOException, JSONException {
+		String output = new String();
 		
 		byte[] resultBuff = new byte[0];
-	    byte[] buff = new byte[1000000];
+	    byte[] buff = new byte[2000000];
 	    int k = -1;
 	    while((k = input.read(buff, 0, buff.length)) > -1) {
 	        byte[] tbuff = new byte[resultBuff.length + k]; // temp buffer size = bytes already read + bytes last read
 	        System.arraycopy(resultBuff, 0, tbuff, 0, resultBuff.length); // copy previous bytes
 	        System.arraycopy(buff, 0, tbuff, resultBuff.length, k);  // copy current lot
 	        resultBuff = tbuff; // call the temp buffer as your result buff
-	        System.out.println(client.process(new ByteArrayInputStream(resultBuff)));
-	        
+	        //System.out.println(client.process(new ByteArrayInputStream(resultBuff)));
+	        output += client.process(new ByteArrayInputStream(resultBuff));
 	    }
-	    String s = new String(resultBuff);
-	    System.out.println(s + " bytes read.");
-	   // return new ByteArrayInputStream(resultBuff);
+	    //String s = new String(resultBuff);
+	    //System.out.println(s + " bytes read.");
+	    //System.out.println(new ByteArrayInputStream(resultBuff));
+	    //System.out.println(output);
+	    JSONObject obj = new JSONObject(output);
+	    String n = obj.getString("DisplayText");
+	    System.out.println("Generated output: "+n);
 	}
 }
